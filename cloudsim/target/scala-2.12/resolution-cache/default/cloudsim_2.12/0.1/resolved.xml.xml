@@ -4,7 +4,7 @@
 		module="cloudsim_2.12"
 		revision="0.1"
 		status="integration"
-		publication="20190202150356"
+		publication="20190208144801"
 	>
 		<description>
 		cloudsim
@@ -32,9 +32,12 @@
 	<dependencies>
 		<dependency org="org.scala-lang" name="scala-compiler" rev="2.12.8" conf="scala-tool->default,optional(default)"/>
 		<dependency org="org.scala-lang" name="scala-library" rev="2.12.8" conf="scala-tool->default,optional(default);compile->default(compile)"/>
-		<dependency org="ch.qos.logback" name="logback-classic" rev="1.2.3" conf="compile->default(compile)"/>
+		<dependency org="org.scalatest" name="scalatest_2.12" rev="3.0.5" conf="test->default(compile)"/>
+		<dependency org="junit" name="junit" rev="4.12" conf="test->default(compile)"/>
+		<dependency org="ch.qos.logback" name="logback-classic" rev="1.2.3" conf="compile->default(compile)">
+			<exclude org="org.slf4j" module="slf4j-log4j12" name="*" type="*" ext="*" conf="" matcher="exact"/>
+		</dependency>
 		<dependency org="org.slf4j" name="slf4j-api" rev="1.7.12" conf="compile->default(compile)"/>
-		<dependency org="org.slf4j" name="slf4j-simple" rev="1.7.12" conf="test->default(compile)"/>
 		<dependency org="com.typesafe" name="config" rev="1.3.2" conf="compile->default(compile)"/>
 		<dependency org="com.typesafe.scala-logging" name="scala-logging_2.12" rev="3.9.2" conf="compile->default(compile)"/>
 		<dependency org="org.apache.commons" name="commons-math3" rev="3.2" conf="compile->default(compile)"/>

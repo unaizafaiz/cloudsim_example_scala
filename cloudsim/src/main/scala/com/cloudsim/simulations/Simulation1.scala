@@ -1,21 +1,11 @@
 package com.cloudsim.simulations
 
-/*
- * Title:        CloudSim Toolkit
- * Description:  CloudSim (Cloud Simulation) Toolkit for Modeling and Simulation
- *               of Clouds
- * Licence:      GPL - http://www.gnu.org/copyleft/gpl.html
- *
- * Copyright (c) 2009, The University of Melbourne, Australia
- */
-
-
 import java.text.DecimalFormat
 import java.util
 import java.util.Calendar
 
+import com.clousdim.UtilizationModelNew
 import com.typesafe.config.{Config, ConfigFactory}
-import com.typesafe.scalalogging.LazyLogging
 import org.cloudbus.cloudsim._
 import org.cloudbus.cloudsim.core.CloudSim
 import org.cloudbus.cloudsim.provisioners.BwProvisionerSimple
@@ -27,25 +17,30 @@ import org.slf4j.{Logger, LoggerFactory}
 
 /**
   * Simulation 1
-  * with xx Datacenter, xx brokers, xx vms and xx policy
+  * with 3 Datacenter, 1 broker, 24 vms and 20 cloudlets
   */
-object Simulation1 extends LazyLogging{
-
-  val config: Config = ConfigFactory.load("my_app.conf")
+object Simulation1 {
+  //Reading parameters from configuration file in src/main/resources
+  val config: Config = ConfigFactory.load("simulation1.conf")
+  //Logger SLf4j object creation
+  val logger: Logger = LoggerFactory.getLogger(getClass)
 
 
   /**
     * Creates main() to run this example
     */
   def main(args: Array[String]): Unit = {
-    logger.info("Starting CloudSimExample6...")
+    logger.info("In main()")
+      initialize()
+  }
+
+  def initialize(): Unit = {
+    logger.info("In initialize() method")
+    logger.info("Starting Simulation1...")
     try {
 
-      //Reading parameters from configuration file in src/main/resources
-
-
-      // First step: Initialize the CloudSim package.
-
+      // Initialize the CloudSim package
+      logger.info("Initialising CloudSim...")
 
       val num_user = config.getInt("def.num_user")  // number of grid users
       val calendar = Calendar.getInstance
@@ -55,56 +50,67 @@ object Simulation1 extends LazyLogging{
       CloudSim.init(num_user, calendar, trace_flag)
 
 
-      // Second step: Create Datacenters
+      //Create Datacenters
       //Datacenters are the resource providers in CloudSim. We need at list one of them to run a CloudSim simulation
-      //@SuppressWarnings(Array("unused")) val datacenter0 = createDatacenter("Datacenter_0")
-      @SuppressWarnings(Array("unused")) val datacenter1 = createDatacenter("Datacenter_1")
+      logger.info("Creating Datacenters")
+      @SuppressWarnings(Array("unused")) val datacenter1 = createDatacenter("datacenter1")
+      @SuppressWarnings(Array("unused")) val datacenter2 = createDatacenter("datacenter2")
+      @SuppressWarnings(Array("unused")) val datacenter3 = createDatacenter("datacenter3")
 
 
-      //Third step: Create Broker
-      val broker = createBroker
+      //Create Broker
+      logger.info("Creating broker")
+      val broker = createBroker("Broker1")
       val brokerId = broker.getId
 
-      //Fourth step: Create VMs
+      //Create VMs
+      logger.info("Creating VM List for broker "+brokerId)
       val vms = config.getInt("def.vms")
-      val vmlist = createVM(brokerId, vms) //creating 20 vms
+      val vmlist = createVM(brokerId, vms)
 
-      //Fifth step: Create cloudlets
+      //Create cloudlets
+      logger.info("Creating Cloudlet List for broker "+brokerId)
       val cloudlets = config.getInt("def.cloudlets")
-      val cloudletList = createCloudlet(brokerId, cloudlets) // creating 40 cloudlets
+      val cloudletList = createCloudlet(brokerId, cloudlets)
+
 
       //send the vms and cloudlets to broker
+      logger.info("Submitting vmlist and clouslet list to "+brokerId)
       broker.submitVmList(vmlist)
       broker.submitCloudletList(cloudletList)
 
-      // Sixth step: Starts the simulation
+      // Start the simulation
+      logger.info("Start simulation")
       CloudSim.startSimulation
 
-      // Final step: Print results when simulation is over
+      // Print results when simulation is over
       val newList = broker.getCloudletReceivedList
       printCloudletList(newList)
 
       //Stop the simulation
+      logger.info("Stop simulation")
       CloudSim.stopSimulation()
 
-      logger.info("CloudSimExample6 finished!")
+      logger.info("Simulation1 finished!")
     } catch {
       case e: Exception =>
         e.printStackTrace()
-        Log.printLine("The simulation has been terminated due to an unexpected error")
+        logger.debug("The simulation has been terminated due to an unexpected error")
     }
   }
 
-  private def createDatacenter(name: String) = { // Here are the steps needed to create a PowerDatacenter:
-    // 1. We need to create a list to store one or more Machines
+   def createDatacenter(name: String) = {
+
+     logger.info("Inside createDatacenter() .... ")
+
+     // create a list to store Machines
     val hostList = new util.ArrayList[Host]
 
 
-    // 2. A Machine contains one or more PEs or CPUs/Cores. Therefore, should
-    //    create a list to store these PEs before creating
-    //    a Machine.
-    val peList1 = new util.ArrayList[Pe]
-    val mips = config.getInt("datacenter.mips")
+    // create a list to store these PEs before creatin a Machine.
+    logger.info("Creating 2 PE list for two quad cores ")
+     val peList1 = new util.ArrayList[Pe]
+     val mips = config.getInt(name+".mips")
 
     // 3. Create PEs and add these into the list.
     //for a quad-core machine, a list of 4 PEs is required:
@@ -113,96 +119,75 @@ object Simulation1 extends LazyLogging{
     peList1.add(new Pe(2, new PeProvisionerSimple(mips)))
     peList1.add(new Pe(3, new PeProvisionerSimple(mips)))
 
-    //Another list, for a dual-core machine
     val peList2 = new util.ArrayList[Pe]
     peList2.add(new Pe(0, new PeProvisionerSimple(mips)))
     peList2.add(new Pe(1, new PeProvisionerSimple(mips)))
+    peList2.add(new Pe(2, new PeProvisionerSimple(mips)))
+    peList2.add(new Pe(3, new PeProvisionerSimple(mips)))
 
 
     //4. Create Hosts with its id and list of PEs and add them to the list of machines
-    var hostId = config.getInt("datacenter.host1.hostID")
-    val ram = config.getInt("datacenter.host1.ram")
+    logger.info("Creating hosts")
+    val hostId = config.getInt(name+".host1.hostID")
+    val ram = config.getInt(name+".host1.ram")
     //host memory (MB)
-    val storage = config.getInt("datacenter.host1.storage")
+    val storage = config.getInt(name+".host1.storage")
     //host storage
-    val bw = config.getInt("datacenter.host1.bw")
-    hostList.add(new Host(hostId, new RamProvisionerSimple(ram), new BwProvisionerSimple(bw), storage, peList1, new VmSchedulerTimeShared(peList1))) // This is our first machine
-
+    val bw = config.getInt(name+".host1.bw")
+    hostList.add(new Host(hostId, new RamProvisionerSimple(ram), new BwProvisionerSimple(bw), storage, peList1, new VmSchedulerSpaceShared(peList1))) // This is our first machine
 
     //4. Create Hosts with its id and list of PEs and add them to the list of machines
-    var host2Id = config.getInt("datacenter.host2.hostID")
-    val host2ram = config.getInt("datacenter.host2.ram") //host memory (MB)
-    val host2storage = config.getInt("datacenter.host2.storage") //host storage
-    val host2bw = config.getInt("datacenter.host2.bw")
-    hostList.add(new Host(host2Id, new RamProvisionerSimple(host2ram), new BwProvisionerSimple(host2bw), host2storage, peList2, new VmSchedulerTimeShared(peList2))) // Second machine
+    val host2Id = config.getInt(name+".host2.hostID")
+    val host2ram = config.getInt(name+".host2.ram") //host memory (MB)
+    val host2storage = config.getInt(name+".host2.storage") //host storage
+    val host2bw = config.getInt(name+".host2.bw")
+    hostList.add(new Host(host2Id, new RamProvisionerSimple(host2ram), new BwProvisionerSimple(host2bw), host2storage, peList2, new VmSchedulerSpaceShared(peList2))) // Second machine
 
-    //To create a host with a space-shared allocation policy for PEs to VMs:
-    //hostList.add(
-    //		new Host(
-    //			hostId,
-    //			new CpuProvisionerSimple(peList1),
-    //			new RamProvisionerSimple(ram),
-    //			new BwProvisionerSimple(bw),
-    //			storage,
-    //			new VmSchedulerSpaceShared(peList1)
-    //		)
-    //	);
-    //To create a host with a oportunistic space-shared allocation policy for PEs to VMs:
-    //hostList.add(
-    //		new Host(
-    //			hostId,
-    //			new CpuProvisionerSimple(peList1),
-    //			new RamProvisionerSimple(ram),
-    //			new BwProvisionerSimple(bw),
-    //			storage,
-    //			new VmSchedulerOportunisticSpaceShared(peList1)
-    //		)
-    //	);
-
-
-    // 5. Create a DatacenterCharacteristics object that stores the
-    //    properties of a data center: architecture, OS, list of
-    //    Machines, allocation policy: time- or space-shared, time zone
-    //    and its price (G$/Pe time unit).
-    val arch = config.getString("datacenter.characteristics.arch")
+    // Creating a Datacenter Characteristics object that stores the properties of a data center
+    logger.info("Configuring Datacenter Characteristics")
+     val arch = config.getString(name+".characteristics.arch")
     // system architecture
-    val os = config.getString("datacenter.characteristics.os")
+    val os = config.getString(name+".characteristics.os")
     // operating system
-    val vmm = config.getString("datacenter.characteristics.vmm")
-    val time_zone = config.getDouble("datacenter.characteristics.time_zone")
+    val vmm = config.getString(name+".characteristics.vmm")
+    val time_zone = config.getDouble(name+".characteristics.time_zone")
     // time zone this resource located
-    val cost = config.getDouble("datacenter.characteristics.cost")
+    val cost = config.getDouble(name+".characteristics.cost")
     // the cost of using processing in this resource
-    val costPerMem = config.getDouble("datacenter.characteristics.costPerMem")
+    val costPerMem = config.getDouble(name+".characteristics.costPerMem")
     // the cost of using memory in this resource
-    val costPerStorage = config.getDouble("datacenter.characteristics.costPerStorage")
+    val costPerStorage = config.getDouble(name+".characteristics.costPerStorage")
     // the cost of using storage in this resource
-    val costPerBw = config.getDouble("datacenter.characteristics.costPerBw")
+    val costPerBw = config.getDouble(name+".characteristics.costPerBw")
     // the cost of using bw in this resource
     val storageList = new util.LinkedList[Storage]
-    //we are not adding SAN devices by now
+
     val characteristics = new DatacenterCharacteristics(arch, os, vmm, hostList, time_zone, cost, costPerMem, costPerStorage, costPerBw)
 
-    // 6. Finally, we need to create a PowerDatacenter object.
+    // Creating a PowerDatacenter object.
 
     try {
       val datacenter = new Datacenter(name, characteristics, new VmAllocationPolicySimple(hostList), storageList, 0)
+      logger.info("Datacenter "+datacenter.getName+" created with id "+datacenter.getId)
       datacenter
     }catch {
       case e: Exception =>
         e.printStackTrace()
+        logger.debug("Datacenter creation terminated due to error")
     }
   }
 
   //We strongly encourage users to develop their own broker policies, to submit vms and cloudlets according
   //to the specific rules of the simulated scenario
-  private def createBroker: DatacenterBroker = {
+  def createBroker(name: String): DatacenterBroker = {
     try {
-      val broker = new DatacenterBroker("Broker")
+      val broker = new DatacenterBroker(name)
+      logger.info("Datacenter "+broker.getName+" created with id "+broker.getId)
       return broker
     } catch {
       case e: Exception =>
         e.printStackTrace()
+        logger.debug("Broker creation terminated due to error")
         return null
     }
   }
@@ -213,7 +198,9 @@ object Simulation1 extends LazyLogging{
     * @param vms: number of vms to be created
     * @return vm list
     */
-  private def createVM(userId: Int, vms: Int) = { //Creates a container to store VMs. This list is passed to the broker later
+  def createVM(userId: Int, vms: Int) = { //Creates a container to store VMs. This list is passed to the broker later
+    logger.info("Inside createVM() method...")
+    logger.info("Initialising VM Parameters")
     val list = new util.LinkedList[Vm]
     //VM Parameters
     val size = config.getInt("vm.size")
@@ -227,21 +214,11 @@ object Simulation1 extends LazyLogging{
     val vmm = config.getString("vm.vmm")
     //VMM name
     //create VMs
-    val vm = new Array[Vm](vms)
-    var i = 0
-    while ( {
-      i < vms
-    }) {
-      vm(i) = new Vm(i, userId, mips, pesNumber, ram, bw, size, vmm, new CloudletSchedulerSpaceShared)
-
-      //for creating a VM with a space shared scheduling policy for cloudlets:
-      //vm[i] = Vm(i, userId, mips, pesNumber, ram, bw, size, priority, vmm, new CloudletSchedulerSpaceShared());
-
-      list.add(vm(i))
-
-      {
-        i += 1; i - 1
-      }
+    val range = 0 until vms
+    for( i <- range){
+      val vm = new Vm(i, userId, mips, pesNumber, ram, bw, size, vmm, new CloudletSchedulerSpaceShared)
+      list.add(vm)
+      logger.info("VM "+vm.getId+" created for broker "+vm.getUserId)
     }
     list
   }
@@ -253,29 +230,29 @@ object Simulation1 extends LazyLogging{
     * @return Cloudlet list
     */
 
-  private def createCloudlet(userId: Int, cloudlets: Int) = { // Creates a container to store Cloudlets
-    val list = new util.LinkedList[Cloudlet]
+   def createCloudlet(userId: Int, cloudlets: Int) = { // Creates a container to store Cloudlets
+     logger.info("Inside createCloudlet() method ... ")
+
+     val list = new util.LinkedList[Cloudlet]
 
     //cloudlet parameters
-    val length = config.getInt("cloudlet.length")
+     logger.info("Initializing cloudlet parameters ... ")
+
+     val length = config.getInt("cloudlet.length")
     val fileSize = config.getInt("cloudlet.fileSize")
     val outputSize = config.getInt("cloudlet.outputSize")
     val pesNumber = config.getInt("cloudlet.pesNumber")
-    val utilizationModel = new UtilizationModelFull()
+    val utilizationModel = new UtilizationModelNew()
     val cloudlet = new Array[Cloudlet](cloudlets)
-    var i = 0
-    while ( {
-      i < cloudlets
-    }) {
-      cloudlet(i) = new Cloudlet(i, length, pesNumber, fileSize, outputSize, utilizationModel, utilizationModel, utilizationModel)
-      // setting the owner of these Cloudlets
-      cloudlet(i).setUserId(userId)
-      list.add(cloudlet(i))
+    val range = 0 until cloudlets
+    range.foreach(id => {
 
-      {
-        i += 1; i - 1
-      }
-    }
+      cloudlet(id) = new Cloudlet(id, length, pesNumber, fileSize, outputSize, utilizationModel, utilizationModel, utilizationModel)
+      // setting the owner of these Cloudlets
+      cloudlet(id).setUserId(userId)
+      logger.info("VM "+cloudlet(id).getCloudletId+" created for broker "+cloudlet(id).getUserId)
+      list.add(cloudlet(id))
+    })
     list
   }
 
@@ -285,25 +262,25 @@ object Simulation1 extends LazyLogging{
     * @param list list of Cloudlets
     */
   private def printCloudletList(list: util.List[_ <: Cloudlet]): Unit = {
+    logger.info("Printing cloudlet output")
     val size = list.size
     val indent = "    "
     Log.printLine()
     Log.printLine("========== OUTPUT ==========")
-    Log.printLine("Cloudlet ID" + indent + "STATUS" + indent + "Data center ID" + indent + "VM ID" + indent + indent + "Time" + indent + "Start Time" + indent + "Finish Time")
+    Log.printLine("Cloudlet ID" + indent + "STATUS" + indent + "Data center ID" + indent + "VM ID" + indent + indent + "Time" + indent + "Start Time" + indent + "Finish Time"+indent+indent+"Total cost")
     val dft = new DecimalFormat("###.##")
-    var i = 0
-    while ( {
-      i < size
-    }) {
-      val cloudlet = list.get(i)
+
+    val listIterator = list.iterator()
+    while (listIterator.hasNext){
+      val cloudlet = listIterator.next()
+      val utility = new Utility
+      cloudlet.getAllResourceId
       Log.print(indent + cloudlet.getCloudletId + indent + indent)
       if (cloudlet.getCloudletStatus == Cloudlet.SUCCESS) {
+        //val totalCost = cloudlet.getCostPerSec()*cloudlet.getActualCPUTime()
+        val totalCost = utility.getExecutionTime(cloudlet)
         Log.print("SUCCESS")
-        Log.printLine(indent + indent + cloudlet.getResourceId + indent + indent + indent + cloudlet.getVmId + indent + indent + indent + dft.format(cloudlet.getActualCPUTime) + indent + indent + dft.format(cloudlet.getExecStartTime) + indent + indent + indent + dft.format(cloudlet.getFinishTime))
-      }
-
-      {
-        i += 1; i - 1
+        Log.printLine(indent + indent + cloudlet.getResourceId + indent + indent + indent + cloudlet.getVmId + indent + indent + indent + dft.format(cloudlet.getActualCPUTime) + indent + indent + dft.format(cloudlet.getExecStartTime) + indent + indent + indent + dft.format(cloudlet.getFinishTime)+indent + indent + indent + dft.format(totalCost))
       }
     }
   }

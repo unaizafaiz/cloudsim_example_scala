@@ -1,0 +1,7 @@
+[0m[[0m[31merror[0m] [0m[0m/Users/unaizafaiz/Documents/UIC/Spring2019/CloudComputing/Homework/unaiza_faiz_hw1/cloudsim/src/test/scala/Simulation1Test.scala:23:22: not found: value simulation1[0m
+[0m[[0m[31merror[0m] [0m[0m        val broker = simulation1.createBroker("Broker0")[0m
+[0m[[0m[31merror[0m] [0m[0m                     ^[0m
+[0m[[0m[31merror[0m] [0m[0m/Users/unaizafaiz/Documents/UIC/Spring2019/CloudComputing/Homework/unaiza_faiz_hw1/cloudsim/src/test/scala/Simulation1Test.scala:25:25: not found: value simulation1[0m
+[0m[[0m[31merror[0m] [0m[0m        val cloudlets = simulation1.createCloudlet(brokerID, 10)[0m
+[0m[[0m[31merror[0m] [0m[0m                        ^[0m
+[0m[[0m[31merror[0m] [0m[0mtwo errors found[0m
