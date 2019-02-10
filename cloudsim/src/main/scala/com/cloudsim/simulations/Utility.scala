@@ -30,7 +30,7 @@ class Utility {
 
   def getExecutionTime(cloudlet: Cloudlet): Double ={
     val listCost = new util.ArrayList[Double]()
-    //Get all resouces for the cloudlet
+    //Get all resources for the cloudlet
     val resources = cloudlet.getAllResourceId
     resources.foreach(resource => {
       //calculate cost for each resource
