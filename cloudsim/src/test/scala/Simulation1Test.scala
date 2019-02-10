@@ -1,7 +1,6 @@
 import java.util.Calendar
 
 import com.cloudsim.simulations.Simulation1
-import com.cloudsim.simulations.Simulation1.config
 import org.cloudbus.cloudsim.DatacenterBroker
 import org.cloudbus.cloudsim.core.CloudSim
 import org.scalatest.junit.AssertionsForJUnit

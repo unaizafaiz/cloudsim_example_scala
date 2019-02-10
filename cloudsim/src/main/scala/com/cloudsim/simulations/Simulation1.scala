@@ -4,16 +4,11 @@ import java.text.DecimalFormat
 import java.util
 import java.util.Calendar
 
-import com.clousdim.UtilizationModelNew
 import com.typesafe.config.{Config, ConfigFactory}
 import org.cloudbus.cloudsim._
 import org.cloudbus.cloudsim.core.CloudSim
-import org.cloudbus.cloudsim.provisioners.BwProvisionerSimple
-import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple
-import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple
+import org.cloudbus.cloudsim.provisioners.{BwProvisionerSimple, PeProvisionerSimple, RamProvisionerSimple}
 import org.slf4j.{Logger, LoggerFactory}
-
-
 
 /**
   * Simulation 1
@@ -33,6 +28,7 @@ object Simulation1 {
     logger.info("In main()")
       initialize()
   }
+
 
   def initialize(): Unit = {
     logger.info("In initialize() method")
@@ -85,7 +81,8 @@ object Simulation1 {
 
       // Print results when simulation is over
       val newList = broker.getCloudletReceivedList
-      printCloudletList(newList)
+      printCloudletList(newList, brokerId)
+      val utility = new Utility
 
       //Stop the simulation
       logger.info("Stop simulation")
@@ -242,7 +239,7 @@ object Simulation1 {
     val fileSize = config.getInt("cloudlet.fileSize")
     val outputSize = config.getInt("cloudlet.outputSize")
     val pesNumber = config.getInt("cloudlet.pesNumber")
-    val utilizationModel = new UtilizationModelNew()
+    val utilizationModel = new UtilizationModelFull()
     val cloudlet = new Array[Cloudlet](cloudlets)
     val range = 0 until cloudlets
     range.foreach(id => {
@@ -261,7 +258,7 @@ object Simulation1 {
     *
     * @param list list of Cloudlets
     */
-  private def printCloudletList(list: util.List[_ <: Cloudlet]): Unit = {
+  private def printCloudletList(list: util.List[_ <: Cloudlet], brokerId: Int): Unit = {
     logger.info("Printing cloudlet output")
     val size = list.size
     val indent = "    "
@@ -270,18 +267,22 @@ object Simulation1 {
     Log.printLine("Cloudlet ID" + indent + "STATUS" + indent + "Data center ID" + indent + "VM ID" + indent + indent + "Time" + indent + "Start Time" + indent + "Finish Time"+indent+indent+"Total cost")
     val dft = new DecimalFormat("###.##")
 
+    val cloudletCost = new util.ArrayList[Double]()
     val listIterator = list.iterator()
+    val listCloudletCost = new util.ArrayList[Double]()
+    val utility = new Utility
     while (listIterator.hasNext){
       val cloudlet = listIterator.next()
-      val utility = new Utility
       cloudlet.getAllResourceId
       Log.print(indent + cloudlet.getCloudletId + indent + indent)
       if (cloudlet.getCloudletStatus == Cloudlet.SUCCESS) {
-        //val totalCost = cloudlet.getCostPerSec()*cloudlet.getActualCPUTime()
         val totalCost = utility.getExecutionTime(cloudlet)
+        listCloudletCost.add(totalCost)
         Log.print("SUCCESS")
         Log.printLine(indent + indent + cloudlet.getResourceId + indent + indent + indent + cloudlet.getVmId + indent + indent + indent + dft.format(cloudlet.getActualCPUTime) + indent + indent + dft.format(cloudlet.getExecStartTime) + indent + indent + indent + dft.format(cloudlet.getFinishTime)+indent + indent + indent + dft.format(totalCost))
       }
     }
+    println("Broker"+brokerId+" expenditure = "+utility.getTotalApplicationsCost(listCloudletCost))
+
   }
 }
