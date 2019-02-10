@@ -1,13 +1,15 @@
 package com.cloudsim.simulations
 
 import java.util
+
 import scala.collection.JavaConversions._
-import org.cloudbus.cloudsim.{Cloudlet}
+import org.cloudbus.cloudsim.Cloudlet
 
 /**
   * Class to define utility functions
   */
 class Utility {
+
 
   /**
     * Find the total expenditure of broker to execute all classes
@@ -28,11 +30,14 @@ class Utility {
 
   def getExecutionTime(cloudlet: Cloudlet): Double ={
     val listCost = new util.ArrayList[Double]()
+    //Get all resouces for the cloudlet
     val resources = cloudlet.getAllResourceId
     resources.foreach(resource => {
+      //calculate cost for each resource
       val costPerSec = cloudlet.getCostPerSec(resource)
       listCost.add(costPerSec * cloudlet.getActualCPUTime())
     })
+    //calculate complete cost
     val cost = listCost.fold(0.0)(_+_)
     cost
   }

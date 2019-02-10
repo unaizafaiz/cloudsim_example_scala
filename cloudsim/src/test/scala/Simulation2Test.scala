@@ -1,6 +1,6 @@
 import java.util.Calendar
 
-import com.cloudsim.simulations.{Simulation1, Simulation2}
+import com.cloudsim.simulations. Simulation2
 import org.cloudbus.cloudsim.core.CloudSim
 import org.scalatest.junit.AssertionsForJUnit
 import org.junit.{Before, Test}
@@ -40,28 +40,28 @@ class Simulation2Test extends AssertionsForJUnit  {
   @Test def verifyCreateVMReturnsIsEmpty(): Unit = {
     val broker = Simulation2.createBroker("Broker0")
     logger.info("Testing VM Creation returns empty list")
-    val actualVMList = Simulation1.createVM(broker.getId,0)
+    val actualVMList = Simulation2.createVM(broker.getId,0)
     assert(actualVMList.isEmpty)
   }
 
   @Test def verifyCreateVMReturnsListNotEmpty(): Unit = {
     val broker = Simulation2.createBroker("Broker0")
     logger.info("Testing VM Creation returns list of specified size")
-    val actualVMList = Simulation1.createVM(broker.getId,20)
+    val actualVMList = Simulation2.createVM(broker.getId,20)
     assert(actualVMList.size() == 20)
   }
 
   @Test def verifyCreateCloudletReturnsEmpty(): Unit = {
     val broker = Simulation2.createBroker("Broker0")
     logger.info("Testing createCloudlet returns an empty list")
-    val actualCloudletlist = Simulation1.createCloudlet(broker.getId,0)
+    val actualCloudletlist = Simulation2.createCloudlet(broker.getId,0)
     assert(actualCloudletlist.isEmpty)
   }
 
   @Test def verifyCreateCloudletReturnsList(): Unit = {
     val broker = Simulation2.createBroker("Broker0")
     logger.info("Testing createCloudlet returns cloudlet list of specified size")
-    val actualCloudletlist = Simulation1.createCloudlet(broker.getId,10)
+    val actualCloudletlist = Simulation2.createCloudlet(broker.getId,10)
     assert(actualCloudletlist.size == 10)
   }
 
