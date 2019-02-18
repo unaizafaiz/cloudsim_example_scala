@@ -1,1 +1,6 @@
-feedback goes here
+Hi Unaiza:
+thank you for your submission. You may consider learning scalatest and using behavioral testing, but it is ok for now. Your code is well commented and you provided good analysis in your README.
+
+I like how you created different simulations, but you didn't discuss results much. I would like to see different policy implementations, but it is ok. Your implementation is rather primitive one and you didn't go beyond the
+basic examples and you didn't analyze the results of your simulations. Yet, the quality of the basic implementation is ok - you have a partial grade, %.
+
