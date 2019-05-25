@@ -1,4 +1,0 @@
-[0m[[0m[31merror[0m] [0m[0m/Users/unaizafaiz/Documents/UIC/Spring2019/CloudComputing/Homework/unaiza_faiz_hw1/cloudsim/src/test/scala/Simulation1Test.scala:3:33: object Simulation1 is not a member of package com.cloudsim.simulations[0m
-[0m[[0m[31merror[0m] [0m[0mimport com.cloudsim.simulations.Simulation1.config[0m
-[0m[[0m[31merror[0m] [0m[0m                                ^[0m
-[0m[[0m[31merror[0m] [0m[0mone error found[0m
